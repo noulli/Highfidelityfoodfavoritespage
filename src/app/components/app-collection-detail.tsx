@@ -11,10 +11,12 @@ import { RetroPageStateCard } from "./retro-page-state-card";
 import { RetroAddStoreSheet } from "./retro-add-store-sheet";
 import { RetroActionSheet, type ActionSheetItem } from "./retro-action-sheet";
 import { RetroEditStoreSheet } from "./retro-edit-store-sheet";
+import { RetroCollaboratorSheet } from "./retro-collaborator-sheet";
 import {
   mockCollectionDetail,
   mockStoreCards,
   mockPermissions,
+  mockCollaborators,
   type StoreCard,
 } from "./collection-detail-mock-data";
 import { color, ink, typography, fontFamily } from "../tokens";
@@ -35,6 +37,7 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
   const [privacyVariant, setPrivacyVariant] = useState(detail.privacyVariant);
   const [actionTarget, setActionTarget] = useState<StoreCard | null>(null);
   const [editTarget, setEditTarget] = useState<StoreCard | null>(null);
+  const [collaboratorSheetVisible, setCollaboratorSheetVisible] = useState(false);
   const isCreatorMode = permissions.canEditPlaces || permissions.canRemovePlace;
 
   const buildCollectionActionSheetItems = (): ActionSheetItem[] => {
@@ -45,6 +48,8 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
         action: "toggleVisibility",
         label: privacyVariant === "public" ? "设为私密" : "设为公开",
       });
+    if (permissions.canManageMembers)
+      items.push({ action: "manageCollaborators", label: "协作管理" });
     if (permissions.canExitCollaboration)
       items.push({ action: "exitCollaboration", label: "退出协作", danger: true });
     return items;
@@ -75,6 +80,8 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
       setAddSheetVisible(true);
     } else if (action === "toggleVisibility") {
       setPrivacyVariant((prev) => (prev === "public" ? "private" : "public"));
+    } else if (action === "manageCollaborators") {
+      setCollaboratorSheetVisible(true);
     }
   };
 
@@ -166,6 +173,7 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
               contributorCountLabel={detail.contributorCountLabel}
               shopCountLabel={detail.shopCountLabel}
               canSeeSaveAction={permissions.canSeeSaveAction && !isCreatorMode}
+              onContributorTap={() => setCollaboratorSheetVisible(true)}
             />
           </>
         )}
@@ -302,6 +310,16 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
           items={buildStoreActionSheetItems()}
           onAction={handleStoreAction}
           onCancel={() => setActionTarget(null)}
+        />
+
+        <RetroCollaboratorSheet
+          visible={collaboratorSheetVisible}
+          collaborators={mockCollaborators}
+          canManageMembers={permissions.canManageMembers}
+          onClose={() => setCollaboratorSheetVisible(false)}
+          onManage={() => setCollaboratorSheetVisible(false)}
+          onInvite={() => setCollaboratorSheetVisible(false)}
+          onRowMore={() => {}}
         />
 
         <RetroEditStoreSheet

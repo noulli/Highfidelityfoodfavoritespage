@@ -107,3 +107,17 @@ export const mockPermissions: Permissions = {
   canManageMembers: true,
   canExitCollaboration: false,
 };
+
+export interface Collaborator {
+  id: number;
+  name: string;
+  avatarUrl: string;
+  fallback: string;
+  role: "owner" | "member";
+}
+
+export const mockCollaborators: Collaborator[] = [
+  { id: 1, name: "Sarah", avatarUrl: "", fallback: "S", role: "owner" },
+  { id: 2, name: "小明", avatarUrl: "", fallback: "明", role: "member" },
+  { id: 3, name: "阿花", avatarUrl: "", fallback: "花", role: "member" },
+];
