@@ -30,10 +30,10 @@ export function RetroHeroBottomStatsBar({
 
   return (
     <div
-      className="mx-5 px-1 py-3 flex items-center justify-between"
+      className="mx-5 px-1 py-3 flex items-center justify-between gap-3"
       style={{ borderTop: `1px solid ${ink.hairline}`, borderBottom: `1px solid ${ink.hairline}` }}
     >
-      <div className="flex items-center gap-5">
+      <div className="flex min-w-0 items-center gap-4">
         <div className="inline-flex items-center gap-1.5">
           <Store className="size-4" strokeWidth={1.5} style={{ color: color.sage }} />
           <span className="text-[13px]" style={{ color: color.espresso }}>
@@ -44,16 +44,18 @@ export function RetroHeroBottomStatsBar({
           <Heart
             className="size-4"
             strokeWidth={1.5}
-            style={{ color: saved ? color.tomato : color.muted }}
+            style={{ color: saved ? color.tomato : color.mutedText }}
             fill={saved ? color.tomato : "none"}
           />
-          <span className="text-[13px]" style={{ color: color.muted }}>
+          <span className="text-[13px]" style={{ color: color.mutedText }}>
             {savedLabel}
           </span>
         </div>
         <button
           onClick={onContributorTap}
-          className="inline-flex items-center gap-1.5"
+          aria-label={`查看协作者,${contributorCountLabel}`}
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ outlineColor: color.espresso }}
         >
           <Users className="size-4" strokeWidth={1.5} style={{ color: color.sage }} />
           <span className="text-[13px]" style={{ color: color.espresso }}>
@@ -65,11 +67,12 @@ export function RetroHeroBottomStatsBar({
       {canSeeSaveAction && (
         <button
           onClick={handleSave}
-          className="px-3.5 py-1.5 rounded-full border text-[12px] transition-colors"
+          className="min-h-10 shrink-0 rounded-full border px-4 text-[12px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           style={{
             borderColor: saved ? color.tomato : ink.edge,
             background: saved ? `${color.tomato}10` : "transparent",
-            color: saved ? color.tomato : color.espresso,
+            color: saved ? color.tomatoText : color.espresso,
+            outlineColor: color.espresso,
           }}
         >
           {saved ? "已收藏" : "收藏"}

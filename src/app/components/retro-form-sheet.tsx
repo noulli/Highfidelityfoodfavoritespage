@@ -8,8 +8,11 @@ interface Props {
   subtitle?: string;
   showHeaderDivider?: boolean;
   showFooterDivider?: boolean;
+  showFooter?: boolean;
   showBack?: boolean;
   backDisabled?: boolean;
+  backLabel?: string;
+  titleAlign?: "left" | "center";
   submitText: string;
   submitDisabled?: boolean;
   submitLoading?: boolean;
@@ -27,8 +30,11 @@ export function RetroFormSheet({
   subtitle,
   showHeaderDivider = true,
   showFooterDivider = true,
+  showFooter = true,
   showBack,
   backDisabled,
+  backLabel = "返回上一步",
+  titleAlign = "left",
   submitText,
   submitDisabled,
   submitLoading,
@@ -86,7 +92,7 @@ export function RetroFormSheet({
               <button
                 onClick={() => !backDisabled && onBack?.()}
                 disabled={backDisabled}
-                aria-label="返回上一步"
+                aria-label={backLabel}
                 className="absolute left-0 size-9 -ml-2 flex items-center justify-center"
                 style={{ color: backDisabled ? color.muted : color.espresso }}
               >
@@ -94,11 +100,12 @@ export function RetroFormSheet({
               </button>
             )}
             <h2
+              className={titleAlign === "center" ? "absolute left-1/2 -translate-x-1/2 text-center" : ""}
               style={{
                 ...typography.sectionTitle,
                 fontSize: 17,
                 letterSpacing: "0.15em",
-                marginLeft: showBack ? 32 : 0,
+                marginLeft: titleAlign === "left" && showBack ? 32 : 0,
               }}
             >
               {title}
@@ -126,25 +133,27 @@ export function RetroFormSheet({
 
         <div className="flex-1 overflow-y-auto px-5 py-5">{children}</div>
 
-        {showFooterDivider && (
+        {showFooter && showFooterDivider && (
           <div className="mx-5 h-px" style={{ background: ink.rule }} />
         )}
 
-        <div className="px-5 pt-4 pb-6">
-          <button
-            onClick={() => !submitDisabled && !submitLoading && onSubmit?.()}
-            disabled={submitDisabled || submitLoading}
-            className="w-full h-12 inline-flex items-center justify-center text-[13px] tracking-[0.3em] rounded-full transition-opacity"
-            style={{
-              background: color.espresso,
-              color: color.paper,
-              fontFamily: fontFamily.serif,
-              opacity: submitDisabled || submitLoading ? 0.4 : 1,
-            }}
-          >
-            {submitLoading ? "提 交 中..." : submitText}
-          </button>
-        </div>
+        {showFooter && (
+          <div className="px-5 pt-4 pb-6">
+            <button
+              onClick={() => !submitDisabled && !submitLoading && onSubmit?.()}
+              disabled={submitDisabled || submitLoading}
+              className="w-full h-12 inline-flex items-center justify-center text-[13px] tracking-[0.3em] rounded-full transition-opacity"
+              style={{
+                background: color.espresso,
+                color: color.paper,
+                fontFamily: fontFamily.serif,
+                opacity: submitDisabled || submitLoading ? 0.4 : 1,
+              }}
+            >
+              {submitLoading ? "提 交 中..." : submitText}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

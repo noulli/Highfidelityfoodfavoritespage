@@ -13,6 +13,9 @@ export const color = {
   tomato: "#E85D3C",      // 强调 / 主推 / 创建
   sage: "#8FA181",        // 次强调 / 收藏 / 城市
   muted: "#9C9489",       // 次级文字 / icon
+  mutedText: "#675D54",   // AA 次级正文 / meta
+  sageText: "#5F6F4B",    // AA 绿色语义文字
+  tomatoText: "#A33D27",  // AA 红色语义文字
   warmFill: "#EBE3D7",    // 头像底 / 封面占位
   privateFill: "#EFEAE0", // 私密集子卡片底
   publicFill: "#F1E8DE",  // 公开集子卡片底
@@ -98,13 +101,13 @@ export const typography = {
   /** 次级 meta(地址、菜系、计数) */
   meta: {
     fontSize: 12,
-    color: color.muted,
+    color: color.mutedText,
   },
   /** 极小标签(NO. / SAVES 等小写字间距标签) */
   microLabel: {
     fontSize: 10,
     letterSpacing: "0.3em",
-    color: color.muted,
+    color: color.mutedText,
   },
   /** 装饰性编号(NO. 01 italic Playfair) */
   numeral: {

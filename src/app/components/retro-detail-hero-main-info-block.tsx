@@ -9,7 +9,7 @@ interface Props {
   creatorFallback: string;
   creatorLabel: string;
   updatedAtLabel: string;
-  recentActivityLabel: string;
+  roleLabel?: string;
   privacyVariant: "public" | "private";
   showPrivacyBadge: boolean;
 }
@@ -22,7 +22,7 @@ export function RetroDetailHeroMainInfoBlock({
   creatorFallback,
   creatorLabel,
   updatedAtLabel,
-  recentActivityLabel,
+  roleLabel,
   privacyVariant,
   showPrivacyBadge,
 }: Props) {
@@ -31,9 +31,9 @@ export function RetroDetailHeroMainInfoBlock({
       <div className="flex items-center gap-2 mb-3">
         <span
           className="inline-flex items-center gap-1 text-[12px]"
-          style={{ color: color.sage }}
+          style={{ color: color.sageText }}
         >
-          <MapPin className="size-3.5" strokeWidth={1.75} />
+          <MapPin className="size-3.5" strokeWidth={1.75} style={{ color: color.sage }} />
           {cityLabel}
         </span>
         {showPrivacyBadge && (
@@ -44,7 +44,9 @@ export function RetroDetailHeroMainInfoBlock({
             />
             <span
               className="inline-flex items-center gap-1 text-[11px]"
-              style={{ color: privacyVariant === "private" ? color.muted : color.sage }}
+              style={{
+                color: privacyVariant === "private" ? color.mutedText : color.sageText,
+              }}
             >
               {privacyVariant === "private" ? (
                 <Lock className="size-3" strokeWidth={1.75} />
@@ -93,16 +95,25 @@ export function RetroDetailHeroMainInfoBlock({
           style={{ background: color.muted, opacity: 0.4 }}
         />
         <span style={typography.meta}>{updatedAtLabel}</span>
+        {roleLabel && (
+          <>
+            <span
+              className="size-1 rounded-full"
+              style={{ background: color.muted, opacity: 0.4 }}
+            />
+            <span
+              className="rounded px-1.5 py-0.5 text-[11px]"
+              style={{
+                background: ink.chip,
+                color: color.mutedText,
+              }}
+            >
+              {roleLabel}
+            </span>
+          </>
+        )}
       </div>
 
-      {recentActivityLabel && (
-        <div
-          className="mt-3 pl-3 text-[12px]"
-          style={{ color: color.tomato, borderLeft: `2px solid ${color.tomato}` }}
-        >
-          {recentActivityLabel}
-        </div>
-      )}
     </section>
   );
 }

@@ -36,7 +36,7 @@ export function RetroStoreCardShell({
           <span
             className="text-[12px] tracking-[0.15em] shrink-0"
             style={{
-              color: color.muted,
+              color: color.mutedText,
               fontFamily: fontFamily.serif,
               fontVariantNumeric: "tabular-nums",
             }}
@@ -60,8 +60,8 @@ export function RetroStoreCardShell({
               onEditClick?.();
             }}
             aria-label="更多"
-            className="size-7 flex items-center justify-center shrink-0 -mt-1 -mr-1"
-            style={{ color: color.muted }}
+            className="size-11 flex items-center justify-center shrink-0 -mt-2 -mr-3 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ color: color.mutedText, outlineColor: color.espresso }}
           >
             <MoreVertical className="size-4" strokeWidth={1.5} />
           </button>
@@ -70,7 +70,7 @@ export function RetroStoreCardShell({
 
       <div
         className="mt-1.5 flex items-center gap-2 text-[11px]"
-        style={{ color: color.muted }}
+        style={{ color: color.mutedText }}
       >
         <span>{cuisine}</span>
         <span className="size-0.5 rounded-full" style={{ background: color.muted }} />
@@ -84,9 +84,9 @@ export function RetroStoreCardShell({
 
       <div
         className="mt-1.5 inline-flex items-start gap-1 text-[11px]"
-        style={{ color: color.muted }}
+        style={{ color: color.mutedText }}
       >
-        <MapPin className="size-3 mt-0.5 shrink-0" strokeWidth={1.75} />
+        <MapPin className="size-3 mt-0.5 shrink-0" strokeWidth={1.75} style={{ color: color.muted }} />
         <span className="line-clamp-1">{address}</span>
       </div>
 
@@ -117,8 +117,8 @@ export function RetroStoreCardShell({
         </div>
       )}
 
-      <div className="mt-3 text-[10px] tracking-[0.2em]" style={{ color: color.muted }}>
-        — {contributor} 撰
+      <div className="mt-3 text-[10px] tracking-[0.2em]" style={{ color: color.mutedText }}>
+        — {contributor}
       </div>
     </article>
   );

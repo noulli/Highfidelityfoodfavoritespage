@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { ChevronLeft, MoreHorizontal, Bookmark, MapPin } from "lucide-react";
+import { ChevronLeft, MoreHorizontal, MapPin } from "lucide-react";
 import { TNavbar } from "./t-navbar";
 import { RetroDoubleDivider } from "./retro-double-divider";
 import { RetroDetailHeroMainInfoBlock } from "./retro-detail-hero-main-info-block";
 import { RetroHeroBottomStatsBar } from "./retro-hero-bottom-stats-bar";
 import { RetroSectionOrnamentBars } from "./retro-section-ornament-bars";
-import { RetroSectionTitleOrnament } from "./retro-section-title-ornament";
 import { RetroStoreCardShell } from "./retro-store-card-shell";
 import { RetroFloatingActionButton } from "./retro-floating-action-button";
 import { RetroPageStateCard } from "./retro-page-state-card";
@@ -32,8 +31,24 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
   const permissions = mockPermissions;
   const [stores, setStores] = useState(mockStoreCards);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
+  const [collectionActionSheetVisible, setCollectionActionSheetVisible] = useState(false);
+  const [privacyVariant, setPrivacyVariant] = useState(detail.privacyVariant);
   const [actionTarget, setActionTarget] = useState<StoreCard | null>(null);
   const [editTarget, setEditTarget] = useState<StoreCard | null>(null);
+  const isCreatorMode = permissions.canEditPlaces || permissions.canRemovePlace;
+
+  const buildCollectionActionSheetItems = (): ActionSheetItem[] => {
+    const items: ActionSheetItem[] = [];
+    if (permissions.canEditPlaces) items.push({ action: "addStore", label: "添加店铺" });
+    if (permissions.canEditPlaces)
+      items.push({
+        action: "toggleVisibility",
+        label: privacyVariant === "public" ? "设为私密" : "设为公开",
+      });
+    if (permissions.canExitCollaboration)
+      items.push({ action: "exitCollaboration", label: "退出协作", danger: true });
+    return items;
+  };
 
   const buildStoreActionSheetItems = (): ActionSheetItem[] => {
     const items: ActionSheetItem[] = [];
@@ -54,29 +69,41 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
     }
   };
 
+  const handleCollectionAction = (action: string) => {
+    setCollectionActionSheetVisible(false);
+    if (action === "addStore") {
+      setAddSheetVisible(true);
+    } else if (action === "toggleVisibility") {
+      setPrivacyVariant((prev) => (prev === "public" ? "private" : "public"));
+    }
+  };
+
   const effectiveState: DisplayState =
     displayState === "ready" && stores.length === 0 ? "empty" : displayState;
 
   return (
     <div className="min-h-full w-full" style={{ background: color.paper, color: color.espresso }}>
-      <div className="mx-auto max-w-[480px] min-h-screen pb-28">
+      <div className="mx-auto max-w-[480px] min-h-screen pb-36">
         <TNavbar
           title={detail.title}
           left={
             <button
               onClick={onBack}
               aria-label="返回"
-              className="size-9 flex items-center justify-center"
+              className="size-10 flex items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ outlineColor: color.espresso }}
             >
               <ChevronLeft className="size-6" strokeWidth={1.5} style={{ color: color.espresso }} />
             </button>
           }
           right={
-            <div className="flex items-center gap-2 pr-1">
-              <button className="size-9 flex items-center justify-center">
-                <Bookmark className="size-5" strokeWidth={1.5} style={{ color: color.espresso }} />
-              </button>
-              <button className="size-9 flex items-center justify-center">
+            <div className="flex items-center pr-1">
+              <button
+                aria-label="合集管理"
+                onClick={() => setCollectionActionSheetVisible(true)}
+                className="size-10 flex items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{ outlineColor: color.espresso }}
+              >
                 <MoreHorizontal
                   className="size-5"
                   strokeWidth={1.5}
@@ -129,15 +156,16 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
               creatorLabel={detail.creatorLabel}
               updatedAtLabel={detail.updatedAtLabel}
               recentActivityLabel={detail.recentActivityLabel}
-              privacyVariant={detail.privacyVariant}
-              showPrivacyBadge={detail.showPrivacyBadge}
+              roleLabel={isCreatorMode ? "协作管理" : undefined}
+              privacyVariant={privacyVariant}
+              showPrivacyBadge={detail.showPrivacyBadge || privacyVariant === "private"}
             />
 
             <RetroHeroBottomStatsBar
               savedLabel={detail.savedLabel}
               contributorCountLabel={detail.contributorCountLabel}
               shopCountLabel={detail.shopCountLabel}
-              canSeeSaveAction={permissions.canSeeSaveAction}
+              canSeeSaveAction={permissions.canSeeSaveAction && !isCreatorMode}
             />
           </>
         )}
@@ -167,22 +195,25 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
         {(effectiveState === "ready" || effectiveState === "empty") && (
           <div className="mx-5 mt-7">
             <div
-              className="flex items-end justify-between pb-3"
-              style={{ borderBottom: `1px solid ${color.espresso}` }}
+              className="flex items-center justify-between gap-4 pb-3.5"
+              style={{ borderBottom: `1px solid ${ink.hairline}` }}
             >
-              <div className="flex items-center">
+              <div className="flex min-w-0 items-center">
                 <RetroSectionOrnamentBars />
-                <h2 style={typography.sectionTitle}>店铺卡册</h2>
-                <div className="ml-3">
-                  <RetroSectionTitleOrnament />
-                </div>
+                <h2 style={typography.sectionTitle}>店铺列表</h2>
               </div>
               <button
-                className="inline-flex items-center gap-1 px-3 h-8 rounded-full border text-[12px]"
-                style={{ borderColor: ink.edge, color: color.espresso }}
+                type="button"
+                aria-label="查看地图"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-[12px] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{
+                  background: ink.chip,
+                  color: color.espresso,
+                  outlineColor: color.espresso,
+                }}
               >
-                <MapPin className="size-3.5" strokeWidth={1.75} />
-                查看地图
+                <MapPin className="size-4" strokeWidth={1.75} />
+                地图
               </button>
             </div>
           </div>
@@ -214,7 +245,7 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
               showActions={permissions.canEditPlaces}
             >
               <button
-                onClick={() => setStores(mockStoreCards)}
+                onClick={() => setAddSheetVisible(true)}
                 className="px-6 h-11 text-[12px] tracking-[0.2em]"
                 style={{
                   background: color.espresso,
@@ -230,7 +261,7 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
 
         {effectiveState === "ready" && permissions.canEditPlaces && (
           <RetroFloatingActionButton
-            label="添加"
+            label="添加店铺"
             onClick={() => setAddSheetVisible(true)}
           />
         )}
@@ -255,6 +286,14 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
             };
             setStores((prev) => [...prev, newStore]);
           }}
+        />
+
+        <RetroActionSheet
+          visible={collectionActionSheetVisible}
+          title="合集管理"
+          items={buildCollectionActionSheetItems()}
+          onAction={handleCollectionAction}
+          onCancel={() => setCollectionActionSheetVisible(false)}
         />
 
         <RetroActionSheet

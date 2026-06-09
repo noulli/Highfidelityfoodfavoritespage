@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { MapPin, Globe, Lock } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { MapPin, Globe, Lock, ChevronRight, Search } from "lucide-react";
 import { RetroFormSheet } from "./retro-form-sheet";
 import { color, ink, fontFamily, typography } from "../tokens";
 
@@ -32,6 +32,7 @@ const EMPTY: CollectionFormValue = {
 
 const TITLE_MAX = 30;
 const SUMMARY_MAX = 200;
+type SheetView = "form" | "city";
 
 export function RetroCollectionFormSheet({
   visible,
@@ -46,14 +47,16 @@ export function RetroCollectionFormSheet({
     {},
   );
   const [loading, setLoading] = useState(false);
-  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const [activeView, setActiveView] = useState<SheetView>("form");
+  const [cityQuery, setCityQuery] = useState("");
 
   useEffect(() => {
     if (visible) {
       setForm({ ...EMPTY, ...initial });
       setErrors({});
       setLoading(false);
-      setCityPickerOpen(false);
+      setActiveView("form");
+      setCityQuery("");
     }
   }, [visible, initial]);
 
@@ -78,133 +81,167 @@ export function RetroCollectionFormSheet({
   const isEdit = mode === "edit";
   const submitText = isEdit ? "保 存 修 改" : "创 建 合 集";
   const summaryLen = form.summary.length;
+  const normalizedCityQuery = cityQuery.trim().toLowerCase();
+  const cityResults = useMemo(
+    () =>
+      normalizedCityQuery
+        ? cityOptions.filter((opt) =>
+            opt.label.toLowerCase().includes(normalizedCityQuery),
+          )
+        : cityOptions,
+    [cityOptions, normalizedCityQuery],
+  );
+
+  const pickCity = (opt: { code: string; label: string }) => {
+    setForm((f) => ({ ...f, cityCode: opt.code, cityLabel: opt.label }));
+    setErrors((e) => ({ ...e, cityCode: undefined }));
+    setCityQuery("");
+    setActiveView("form");
+  };
 
   return (
-    <>
-      <RetroFormSheet
-        visible={visible}
-        title={isEdit ? "编辑合集" : "新建合集"}
-        showHeaderDivider={false}
-        submitText={submitText}
-        submitLoading={loading}
-        closeDisabled={loading}
-        onClose={onClose}
-        onSubmit={handleSubmit}
-      >
-        <FieldLabel required>标题</FieldLabel>
-        <input
-          value={form.title}
-          maxLength={TITLE_MAX}
-          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          placeholder="给合集起个名字"
-          className="mt-2 w-full h-11 px-3 text-[13px] outline-none rounded"
-          style={{
-            border: `1px solid ${errors.title ? color.tomato : ink.edge}`,
-            background: color.paper,
-            color: color.espresso,
-          }}
+    <RetroFormSheet
+      visible={visible}
+      title={activeView === "city" ? "城市筛选" : isEdit ? "编辑合集" : "新建合集"}
+      showHeaderDivider={activeView === "city"}
+      showFooter={activeView === "form"}
+      showBack={activeView === "city"}
+      backLabel="返回新建合集表单"
+      titleAlign={activeView === "city" ? "center" : "left"}
+      submitText={submitText}
+      submitLoading={loading}
+      closeDisabled={loading}
+      onBack={() => setActiveView("form")}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+    >
+      {activeView === "city" ? (
+        <CityPickerDrillIn
+          query={cityQuery}
+          options={cityResults}
+          onQueryChange={setCityQuery}
+          onPick={pickCity}
         />
-        {errors.title && (
-          <p className="mt-1.5 text-[12px]" style={{ color: color.tomato }}>
-            {errors.title}
-          </p>
-        )}
-
-        <div className="mt-5">
-          <FieldLabel required>城市</FieldLabel>
-          {isEdit ? (
-            <div
-              className="mt-2 w-full h-11 px-3 inline-flex items-center gap-2 rounded text-[13px]"
-              style={{
-                border: `1px solid ${ink.rule}`,
-                background: ink.chip,
-                color: color.muted,
-              }}
-            >
-              <MapPin className="size-4" strokeWidth={1.5} />
-              {form.cityLabel || "—"}
-            </div>
-          ) : (
-            <button
-              onClick={() => setCityPickerOpen(true)}
-              className="mt-2 w-full h-11 px-3 inline-flex items-center gap-2 rounded text-[13px] text-left"
-              style={{
-                border: `1px solid ${errors.cityCode ? color.tomato : ink.edge}`,
-                background: color.paper,
-                color: form.cityLabel ? color.espresso : color.muted,
-              }}
-            >
-              <MapPin className="size-4" strokeWidth={1.5} />
-              {form.cityLabel || "请选择所属城市"}
-            </button>
-          )}
-          {errors.cityCode && (
-            <p className="mt-1.5 text-[12px]" style={{ color: color.tomato }}>
-              {errors.cityCode}
-            </p>
-          )}
-        </div>
-
-        <div className="mt-5">
-          <div className="flex items-baseline gap-2">
-            <FieldLabel>简介</FieldLabel>
-            <span className="text-[11px]" style={{ color: color.muted }}>
-              {summaryLen}/{SUMMARY_MAX}
-            </span>
-          </div>
-          <textarea
-            value={form.summary}
-            maxLength={SUMMARY_MAX}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, summary: e.target.value }))
-            }
-            placeholder="简单介绍一下这个合集"
-            className="mt-2 w-full px-3 py-3 text-[13px] outline-none resize-none rounded"
+      ) : (
+        <>
+          <FieldLabel required>标题</FieldLabel>
+          <input
+            value={form.title}
+            maxLength={TITLE_MAX}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            placeholder="给合集起个名字"
+            className="mt-2 w-full h-11 px-3 text-[13px] outline-none rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
-              border: `1px solid ${ink.edge}`,
+              border: `1px solid ${errors.title ? color.tomato : ink.edge}`,
               background: color.paper,
               color: color.espresso,
-              minHeight: 110,
-              lineHeight: 1.6,
-              fontFamily: fontFamily.serif,
+              outlineColor: color.espresso,
             }}
           />
-        </div>
+          {errors.title && (
+            <p className="mt-1.5 text-[12px]" style={{ color: color.tomato }}>
+              {errors.title}
+            </p>
+          )}
 
-        <div className="mt-5">
-          <FieldLabel>可见性</FieldLabel>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <VisibilityOption
-              icon={<Globe className="size-4" strokeWidth={1.5} />}
-              label="公开"
-              description="所有人都可以查看"
-              accent={color.sage}
-              selected={form.visibility === "public"}
-              onClick={() => setForm((f) => ({ ...f, visibility: "public" }))}
-            />
-            <VisibilityOption
-              icon={<Lock className="size-4" strokeWidth={1.5} />}
-              label="私密"
-              description="仅自己可见"
-              accent={color.espresso}
-              selected={form.visibility === "private"}
-              onClick={() => setForm((f) => ({ ...f, visibility: "private" }))}
+          <div className="mt-5">
+            <FieldLabel required>城市</FieldLabel>
+            {isEdit ? (
+              <div
+                className="mt-2 w-full h-11 px-3 inline-flex items-center gap-2 rounded text-[13px]"
+                style={{
+                  border: `1px solid ${ink.rule}`,
+                  background: ink.chip,
+                  color: color.mutedText,
+                }}
+              >
+                <MapPin className="size-4" strokeWidth={1.5} />
+                {form.cityLabel || "—"}
+              </div>
+            ) : (
+              <button
+                aria-label="选择城市"
+                onClick={() => setActiveView("city")}
+                className="mt-2 w-full h-11 px-3 inline-flex items-center justify-between gap-2 rounded text-[13px] text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{
+                  border: `1px solid ${errors.cityCode ? color.tomato : ink.edge}`,
+                  background: color.paper,
+                  color: form.cityLabel ? color.espresso : color.mutedText,
+                  outlineColor: color.espresso,
+                }}
+              >
+                <span className="min-w-0 inline-flex items-center gap-2">
+                  <MapPin className="size-4 shrink-0" strokeWidth={1.5} />
+                  <span className="truncate">
+                    {form.cityLabel || "请选择所属城市"}
+                  </span>
+                </span>
+                <ChevronRight
+                  className="size-4 shrink-0"
+                  strokeWidth={1.5}
+                  style={{ color: color.mutedText }}
+                  aria-hidden
+                />
+              </button>
+            )}
+            {errors.cityCode && (
+              <p className="mt-1.5 text-[12px]" style={{ color: color.tomato }}>
+                {errors.cityCode}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-5">
+            <div className="flex items-baseline gap-2">
+              <FieldLabel>简介</FieldLabel>
+              <span className="text-[11px]" style={{ color: color.muted }}>
+                {summaryLen}/{SUMMARY_MAX}
+              </span>
+            </div>
+            <textarea
+              value={form.summary}
+              maxLength={SUMMARY_MAX}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, summary: e.target.value }))
+              }
+              placeholder="简单介绍一下这个合集"
+              className="mt-2 w-full px-3 py-3 text-[13px] outline-none resize-none rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{
+                border: `1px solid ${ink.edge}`,
+                background: color.paper,
+                color: color.espresso,
+                minHeight: 110,
+                lineHeight: 1.6,
+                fontFamily: fontFamily.serif,
+                outlineColor: color.espresso,
+              }}
             />
           </div>
-        </div>
-      </RetroFormSheet>
 
-      <CityPickerSheet
-        visible={cityPickerOpen}
-        options={cityOptions}
-        onClose={() => setCityPickerOpen(false)}
-        onPick={(opt) => {
-          setForm((f) => ({ ...f, cityCode: opt.code, cityLabel: opt.label }));
-          setErrors((e) => ({ ...e, cityCode: undefined }));
-          setCityPickerOpen(false);
-        }}
-      />
-    </>
+          <div className="mt-5">
+            <FieldLabel>可见性</FieldLabel>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <VisibilityOption
+                icon={<Globe className="size-4" strokeWidth={1.5} />}
+                label="公开"
+                description="所有人都可以查看"
+                accent={color.sage}
+                selected={form.visibility === "public"}
+                onClick={() => setForm((f) => ({ ...f, visibility: "public" }))}
+              />
+              <VisibilityOption
+                icon={<Lock className="size-4" strokeWidth={1.5} />}
+                label="私密"
+                description="仅自己可见"
+                accent={color.espresso}
+                selected={form.visibility === "private"}
+                onClick={() => setForm((f) => ({ ...f, visibility: "private" }))}
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </RetroFormSheet>
   );
 }
 
@@ -267,68 +304,86 @@ function VisibilityOption({
   );
 }
 
-function CityPickerSheet({
-  visible,
+function CityPickerDrillIn({
+  query,
   options,
-  onClose,
+  onQueryChange,
   onPick,
 }: {
-  visible: boolean;
+  query: string;
   options: { code: string; label: string }[];
-  onClose: () => void;
+  onQueryChange: (query: string) => void;
   onPick: (opt: { code: string; label: string }) => void;
 }) {
-  if (!visible) return null;
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center">
-      <button
-        aria-label="关闭"
-        onClick={onClose}
-        className="absolute inset-0"
-        style={{ background: "rgba(43,31,26,0.45)" }}
-      />
-      <div
-        className="relative w-full max-w-[480px]"
-        style={{
-          background: color.paper,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          maxHeight: "70vh",
-        }}
-      >
-        <div className="pt-3 pb-2 flex justify-center">
-          <div
-            className="h-1 w-10 rounded-full"
-            style={{ background: ink.edge }}
-          />
-        </div>
+    <div className="-mx-5 -my-5">
+      <div className="px-5 py-4">
         <div
-          className="px-5 py-3"
+          className="h-11 px-4 inline-flex w-full items-center gap-2 rounded-full"
           style={{
-            ...typography.sectionTitle,
-            fontSize: 16,
-            letterSpacing: "0.15em",
-            borderBottom: `1px solid ${ink.rule}`,
+            border: `1px solid ${ink.rule}`,
+            background: color.cardSurface,
+            color: color.mutedText,
           }}
         >
-          选择城市
+          <Search className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+          <input
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="搜索城市或区县"
+            className="min-w-0 flex-1 bg-transparent text-[13px] outline-none"
+            style={{ color: color.espresso }}
+            autoFocus
+          />
         </div>
-        <div className="overflow-y-auto" style={{ maxHeight: "50vh" }}>
-          {options.map((opt) => (
-            <button
-              key={opt.code}
-              onClick={() => onPick(opt)}
-              className="w-full px-5 h-12 flex items-center text-[14px]"
-              style={{
-                borderBottom: `1px solid ${ink.hairline}`,
-                color: color.espresso,
-                fontFamily: fontFamily.serif,
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
+      </div>
+
+      <div
+        className="h-px"
+        style={{
+          background: `linear-gradient(to right, transparent, ${ink.rule}, transparent)`,
+        }}
+      />
+
+      <div className="px-5 pt-5 pb-8">
+        <div className="mb-3 flex items-center gap-2">
+          <span
+            className="size-1.5 rounded-full"
+            style={{ background: color.tomato }}
+            aria-hidden
+          />
+          <div className="text-[13px]" style={{ color: color.mutedText }}>
+            {query.trim() ? "搜索结果" : "热门城市"}
+          </div>
         </div>
+
+        {options.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2.5">
+            {options.map((opt) => (
+              <button
+                key={opt.code}
+                onClick={() => onPick(opt)}
+                className="h-[42px] min-w-0 rounded-lg px-2 text-[14px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{
+                  border: `1px solid ${ink.rule}`,
+                  background: color.paper,
+                  color: color.espresso,
+                  fontFamily: fontFamily.serif,
+                  outlineColor: color.espresso,
+                }}
+              >
+                <span className="block truncate">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="flex min-h-32 items-center justify-center text-[13px]"
+            style={{ color: color.mutedText }}
+          >
+            没有找到相关城市
+          </div>
+        )}
       </div>
     </div>
   );

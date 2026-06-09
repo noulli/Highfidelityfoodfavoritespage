@@ -5,10 +5,10 @@ import AppCollectionDetail from "./components/app-collection-detail";
 type Route = "list" | "detail";
 
 export default function App() {
-  const [route, setRoute] = useState<Route>("detail");
+  const [route, setRoute] = useState<Route>("list");
 
   if (route === "detail") {
     return <AppCollectionDetail onBack={() => setRoute("list")} />;
   }
-  return <AppEditorial />;
+  return <AppEditorial onOpenCollection={() => setRoute("detail")} />;
 }

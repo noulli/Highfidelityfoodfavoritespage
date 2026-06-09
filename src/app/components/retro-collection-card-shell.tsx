@@ -6,6 +6,7 @@ export interface CollectionItem {
   id: number;
   title: string;
   summary: string;
+  coverImage?: string;
   storeCount: number;
   favorites: number;
   updatedAt: string;
