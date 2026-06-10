@@ -16,6 +16,7 @@ export const color = {
   mutedText: "#675D54",   // AA 次级正文 / meta
   sageText: "#5F6F4B",    // AA 绿色语义文字
   tomatoText: "#A33D27",  // AA 红色语义文字
+  starText: "#8A5B00",    // AA amber 语义文字(警告 / 创建者徽章)
   warmFill: "#EBE3D7",    // 头像底 / 封面占位
   privateFill: "#EFEAE0", // 私密集子卡片底
   publicFill: "#F1E8DE",  // 公开集子卡片底
@@ -75,6 +76,15 @@ export const typography = {
     letterSpacing: "0.1em",
     color: color.espresso,
     lineHeight: 1.1,
+  },
+  /** 章节标题小号变体(卡片头 / 弹层标题 14-15px,带更宽 tracking) */
+  sectionTitleSmall: {
+    fontFamily: fontFamily.serif,
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: "0.18em",
+    color: color.espresso,
+    lineHeight: 1.2,
   },
   /** 卡片标题(列表项 / 店铺) */
   cardTitle: {
@@ -153,6 +163,37 @@ export const shadow = {
 } as const;
 
 /* ---------- 6. Convenience strings ---------- */
+
+/* ---------- 6.5 Status chip palette ---------- */
+
+/** 状态徽章三色 tone,每个 tone 是一组 {bg, text, border}。
+ *  统一收纳 sage/star/inactive 的 alpha,避免到处出现 ${color.sage}33 之类游离值。 */
+export const statusChip = {
+  active: {
+    bg: `${color.sage}33`,
+    text: color.sageText,
+    border: `${color.sage}73`,
+  },
+  warning: {
+    bg: `${color.star}2E`,
+    text: color.starText,
+    border: `${color.star}73`,
+  },
+  inactive: {
+    bg: ink.chip,
+    text: color.mutedText,
+    border: ink.rule,
+  },
+} as const;
+
+/** 警告/提示条(banner)同源配色,比 chip 更柔和 */
+export const statusBanner = {
+  warning: {
+    bg: `${color.star}1A`,
+    border: `${color.star}55`,
+    text: color.starText,
+  },
+} as const;
 
 /** 标题章节的双色分隔线渐变(目录章节用) */
 export const decorations = {

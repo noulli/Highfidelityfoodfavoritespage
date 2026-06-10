@@ -25,10 +25,15 @@ type DisplayState = "ready" | "loading" | "error" | "denied" | "empty";
 
 interface Props {
   onBack?: () => void;
+  onOpenCollaborationManage?: () => void;
   displayState?: DisplayState;
 }
 
-function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
+function AppCollectionDetail({
+  onBack,
+  onOpenCollaborationManage,
+  displayState = "ready",
+}: Props) {
   const detail = mockCollectionDetail;
   const permissions = mockPermissions;
   const [stores, setStores] = useState(mockStoreCards);
@@ -317,7 +322,10 @@ function AppCollectionDetail({ onBack, displayState = "ready" }: Props) {
           collaborators={mockCollaborators}
           canManageMembers={permissions.canManageMembers}
           onClose={() => setCollaboratorSheetVisible(false)}
-          onManage={() => setCollaboratorSheetVisible(false)}
+          onManage={() => {
+            setCollaboratorSheetVisible(false);
+            onOpenCollaborationManage?.();
+          }}
           onInvite={() => setCollaboratorSheetVisible(false)}
           onRowMore={() => {}}
         />

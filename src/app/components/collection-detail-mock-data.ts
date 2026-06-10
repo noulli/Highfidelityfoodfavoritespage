@@ -116,8 +116,116 @@ export interface Collaborator {
   role: "owner" | "member";
 }
 
+export type CollaborationManageDisplayState =
+  | "ready"
+  | "loading"
+  | "error"
+  | "no_permission";
+
+export type CollaborationStatusTone = "active" | "warning" | "inactive";
+
+export interface CollaborationManageCollection {
+  id: number;
+  title: string;
+  visibility: "public" | "private";
+  collaborative: boolean;
+}
+
+export interface CollaborationManagePermissions {
+  canManageMembers: boolean;
+  canRemoveCollaborator: boolean;
+  canCloseCollaboration: boolean;
+  canRegenerateInviteLink: boolean;
+  canRevokeInviteLink: boolean;
+}
+
+export interface CollaborationInviteLink {
+  inviteToken: string;
+  status: "enabled" | "expired" | "revoked";
+  statusTone: CollaborationStatusTone;
+  statusLabel: string;
+  active: boolean;
+  used: number;
+  limit: number;
+  createdAt: string;
+  expiresAt: string;
+  invitePath: string;
+  inviteUrl: string;
+}
+
+export type CollaborationMemberRole = "owner" | "editor" | "viewer";
+
+export interface CollaborationManageMember {
+  id: number;
+  name: string;
+  avatar: string;
+  role: CollaborationMemberRole;
+  roleLabel: string;
+  contributionCount: number;
+  avatarInitial: string;
+}
+
 export const mockCollaborators: Collaborator[] = [
   { id: 1, name: "Sarah", avatarUrl: "", fallback: "S", role: "owner" },
   { id: 2, name: "小明", avatarUrl: "", fallback: "明", role: "member" },
   { id: 3, name: "阿花", avatarUrl: "", fallback: "花", role: "member" },
+];
+
+export const mockCollaborationManageCollection: CollaborationManageCollection = {
+  id: 1001,
+  title: "上海本帮菜巡礼",
+  visibility: "public",
+  collaborative: true,
+};
+
+export const mockCollaborationManagePermissions: CollaborationManagePermissions = {
+  canManageMembers: true,
+  canRemoveCollaborator: true,
+  canCloseCollaboration: true,
+  canRegenerateInviteLink: true,
+  canRevokeInviteLink: true,
+};
+
+export const mockCollaborationInviteLink: CollaborationInviteLink = {
+  inviteToken: "abc123def456",
+  status: "enabled",
+  statusTone: "active",
+  statusLabel: "生效中",
+  active: true,
+  used: 2,
+  limit: 20,
+  createdAt: "2026-06-01",
+  expiresAt: "2026-07-01",
+  invitePath: "/pages/collection-detail/index?collectionId=1001&inviteToken=abc123def456",
+  inviteUrl: "https://chiida.app/invite/abc123def456",
+};
+
+export const mockCollaborationManageMembers: CollaborationManageMember[] = [
+  {
+    id: 301,
+    name: "Sarah",
+    avatar: "",
+    role: "owner",
+    roleLabel: "创建者",
+    contributionCount: 12,
+    avatarInitial: "S",
+  },
+  {
+    id: 302,
+    name: "小明",
+    avatar: "",
+    role: "editor",
+    roleLabel: "编辑者",
+    contributionCount: 5,
+    avatarInitial: "明",
+  },
+  {
+    id: 303,
+    name: "阿花",
+    avatar: "",
+    role: "viewer",
+    roleLabel: "查看者",
+    contributionCount: 0,
+    avatarInitial: "花",
+  },
 ];
