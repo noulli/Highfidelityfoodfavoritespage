@@ -20,6 +20,7 @@ import {
 } from "./retro-collection-form-sheet";
 import { RetroActionSheet, type ActionSheetItem } from "./retro-action-sheet";
 import { RetroConfirmDialog } from "./retro-confirm-dialog";
+import { RetroCityCover } from "./retro-city-cover";
 
 const CITY_OPTIONS = [
   { code: "shanghai", label: "上海" },
@@ -575,17 +576,12 @@ function CollectionCoverSlot({
   }
 
   return (
-    <div
-      className="relative z-[1] h-28 w-[86px] shrink-0 flex flex-col items-center justify-center pointer-events-none"
-      style={{
-        background: collection.privacy === "private" ? color.privateFill : color.publicFill,
-        border: `1px solid ${ink.hairline}`,
-      }}
-    >
-      <div className="text-[9px] tracking-[0.3em] mb-1" style={{ color: color.mutedText }}>
-        NO.
-      </div>
-      <div style={typography.numeral}>{number}</div>
+    <div className="relative z-[1] h-28 w-[86px] shrink-0">
+      <RetroCityCover
+        city={collection.city}
+        variant={collection.privacy}
+        number={number}
+      />
     </div>
   );
 }
